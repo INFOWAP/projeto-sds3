@@ -4,9 +4,13 @@ import { useState, useEffect } from 'react';
 import { SalePage } from 'types/sale';
 import { formatLocalDate } from 'utils/format';
 import { BASE_URL } from './../../utils/requests';
+import Pagination from './../Pagination/index';
+
+
 const DataTable = () => {
-    
-    const [page,setPage] = useState<SalePage>({
+
+    const [activePage, setActivePage] = useState(0);
+    const [page, setPage] = useState<SalePage>({
         first: true,
         last: true,
         number: 0,
@@ -15,13 +19,19 @@ const DataTable = () => {
     });
 
     useEffect(() => {
-        axios.get(`${BASE_URL}/sales?page=0&size=20&sorte=date,desc`)
+        axios.get(`${BASE_URL}/sales?page=${activePage}&size=20&sorte=date,desc`)
             .then(response => {
                 setPage(response.data)
             })
-    },[]);
-    
+    }, [activePage]);
+
+    const changePage = (index: number) => {
+        setActivePage(index);
+    }
+
     return (
+        <>
+        <Pagination page={page} onPageChange = {changePage}/>
         <div className="table-responsive">
             <table className="table table-striped table-sm">
                 <thead>
@@ -35,19 +45,20 @@ const DataTable = () => {
                 </thead>
                 <tbody>
 
-                    {page.content?.map(item =>(
+                    {page.content?.map(item => (
                         <tr key={item.id}>
-                        <td>{formatLocalDate(item.date,"dd/MM/yyyy")}</td>
-                        <td>{item.seller.name}</td>
-                        <td>{item.visited}</td>
-                        <td>{item.deals}</td>
-                        <td>{item.amount.toFixed(2)}</td>
-                    </tr>
+                            <td>{formatLocalDate(item.date, "dd/MM/yyyy")}</td>
+                            <td>{item.seller.name}</td>
+                            <td>{item.visited}</td>
+                            <td>{item.deals}</td>
+                            <td>{item.amount.toFixed(2)}</td>
+                        </tr>
                     ))}
-                    
+
                 </tbody>
             </table>
         </div>
+        </>
     );
 }
 export default DataTable;
